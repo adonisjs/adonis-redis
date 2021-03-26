@@ -2,35 +2,53 @@ version: 2
 jobs:
   build_12.0.0:
     docker:
-      - image: circleci/node:12.0.0
+      - image: 'circleci/node:12.0.0'
+      - image: 'circleci/redis'
     working_directory: ~/app
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - 'v1-dependencies-{{ checksum "package-lock.json" }}'
             - v1-dependencies-
       - run: npm install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: 'v1-dependencies-{{ checksum "package-lock.json" }}'
+      - run:
+          name: install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:6379 -timeout 1m
       - run: npm test
   build_latest:
     docker:
-      - image: circleci/node:latest
+      - image: 'circleci/node:latest'
+      - image: 'circleci/redis'
     working_directory: ~/app
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - 'v1-dependencies-{{ checksum "package-lock.json" }}'
             - v1-dependencies-
       - run: npm install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: 'v1-dependencies-{{ checksum "package-lock.json" }}'
+      - run:
+          name: install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:6379 -timeout 1m
       - run: npm test
 workflows:
   version: 2

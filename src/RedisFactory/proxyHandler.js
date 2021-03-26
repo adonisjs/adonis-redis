@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
 */
-let proxyHandler = exports = module.exports = {}
+const proxyHandler = exports = module.exports = {}
 
 /**
  * proxies the target attributes and returns defined implementation

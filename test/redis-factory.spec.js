@@ -22,7 +22,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should setup connection with redis', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.once('connect', function () {
       redis.quit()
       done()
@@ -30,7 +30,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should use proxy to call command over redis client', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.set('foo', 'bar')
     const foo = await redis.get('foo')
     assert.equal(foo, 'bar')
@@ -38,7 +38,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should proxy ioredis error event', (assert, done) => {
-    const redis = new RedisFactory({port: 6389, host: 'localhost', retryStrategy: function () { return null }})
+    const redis = new RedisFactory({ port: 6389, host: 'localhost', retryStrategy: function () { return null } })
     redis.on('error', function (error) {
       assert.equal(error.code, 'ECONNREFUSED')
       done()
@@ -46,7 +46,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should be able to quit redis connection', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.once('end', () => {
       done()
     })
@@ -54,7 +54,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should be able to set/get buffer', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.set('foo', Buffer.from('bar'))
     const foo = await redis.getBuffer('foo')
     assert.equal(foo instanceof Buffer, true)
@@ -62,7 +62,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('subscribe to a channel', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     await redis.subscribe('news', function () { })
     assert.isDefined(redis.subscribers.news)
     await redis.quit()
@@ -70,7 +70,7 @@ test.group('RedisFactory', function (group) {
 
   test('subscribing multiple times should throw exception', async (assert) => {
     assert.plan(1)
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     await redis.subscribe('news', function () { })
     try {
       await redis.subscribe('news', function () { })
@@ -82,7 +82,7 @@ test.group('RedisFactory', function (group) {
 
   test('do not register any subscribers when unable to subscribe', async (assert) => {
     assert.plan(3)
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.subscriberConnection = redis._newConnection()
     try {
       await redis.subscriberConnection.quit()
@@ -96,7 +96,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should be able to define subscriber as an autoload namespace', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     const RedisSubscriber = {
       async onNewUser (message) {
         assert.equal(message, 'virk')
@@ -117,7 +117,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('unsubscribe from a channel', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis
       .subscribe('new:user', function () {})
       .then(() => {
@@ -136,14 +136,14 @@ test.group('RedisFactory', function (group) {
   })
 
   test('subscribe to a pattern', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     await redis.psubscribe('new?', function () { })
     assert.isDefined(redis.psubscribers['new?'])
     await redis.quit()
   })
 
   test('receive messages related to a pattern', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis
       .psubscribe('new?', async function (pattern, message, channel) {
         assert.equal(pattern, 'new?')
@@ -158,7 +158,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('unsubscribe from a pattern', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
 
     redis.once('connect', function () {
       redis
@@ -182,7 +182,7 @@ test.group('RedisFactory', function (group) {
 
   test('should throw error when subscriber handler is not defined', async (assert) => {
     assert.plan(1)
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
 
     try {
       await redis.subscribe('bar', {})
@@ -195,7 +195,7 @@ test.group('RedisFactory', function (group) {
 
   test('should throw error when pattern subscriber handler is not defined', async (assert) => {
     assert.plan(1)
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
 
     try {
       await redis.psubscribe('new?', {})
@@ -207,7 +207,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should not listen to messages on different channels', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     redis.subscribe('bar', async (message, channel) => {
       assert.equal(channel, 'bar')
       await redis.quit()
@@ -219,7 +219,7 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should be able to pipe commands', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     const pipe = redis.pipeline()
     const currentTime = new Date().getTime()
     pipe.set('time', currentTime)
@@ -230,26 +230,26 @@ test.group('RedisFactory', function (group) {
   })
 
   test('should not throw exception when unsubscribing from unknown channels', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     await redis.unsubscribe('bar')
     await redis.quit()
   })
 
   test('should not throw exception when unsubscribing from unknown channels', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     await redis.punsubscribe('new?')
     await redis.quit()
   })
 
   test('should be able to pipeline commands', async (assert) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
     const results = await redis.pipeline().set('foo', 'bar').get('foo').exec()
     assert.deepEqual(results, [[null, 'OK'], [null, 'bar']])
     await redis.quit()
   })
 
   test('should close subscriber connection with normal connection when quit is called', (assert, done) => {
-    const redis = new RedisFactory({port: 6379, host: 'localhost'})
+    const redis = new RedisFactory({ port: 6379, host: 'localhost' })
 
     redis
       .subscribe('foo', async function () {})
